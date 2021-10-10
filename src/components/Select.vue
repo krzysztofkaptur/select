@@ -1,30 +1,35 @@
 <template>
   <div class="multiselect">
-    <div class="multiselect__placeholder" @click="openDropdown">
+    <div class="multiselect__placeholder" @click="toggleDropdown">
       <span
         class="multiselect__label"
         :class="[placeholder.length && 'multiselect__label--active']"
       >
         {{ filter.mainLabel.label }}
       </span>
-      <span class="multiselect__selected" v-if="placeholder.length">
+      <span class="multiselect__selected" v-show="placeholder.length">
         {{ placeholder }}
       </span>
       <button class="multiselect__arrow">
-        <div class="multiselect__arrow-icon"></div>
+        <div class="multiselect__arrow-icon"
+        :class="{
+              'multiselect__arrow-icon--rotate' : isDropdownOpened
+          }"
+        ></div>
       </button>
     </div>
     <button
       class="multiselect__close"
       @click="clearChosen"
-      v-if="chosenOptions.length && !isDropdownOpened"
+      v-show="chosenOptions.length && !isDropdownOpened"
     >
       <div class="multiselect__close-icon">X</div>
     </button>
-    <div class="multiselect__options" v-if="isDropdownOpened">
-      <VueCustomScrollbar class="scroll-area" :settings="settings">
-        <div
+    <ul class="multiselect__options" v-show="isDropdownOpened">
+      <VueCustomScrollbar class="scroll-area" :settings="scrollbarSettings">
+        <li
           v-for="(option, index) in filter.options"
+          :key="`${option.value}-${index}`"
           @click="chooseOption(option)"
           class="multiselect__option"
           :class="[
@@ -32,12 +37,12 @@
               'multiselect__option--active'
           ]"
         >
-          <span :data-value="option.value" :key="index">
+          <span :data-value="option.value">
             {{ option.label }}
           </span>
-        </div>
+        </li>
       </VueCustomScrollbar>
-    </div>
+    </ul>
   </div>
 </template>
 
@@ -66,7 +71,7 @@ export default {
   data() {
     return {
       isDropdownOpened: false,
-      settings: {
+      scrollbarSettings: {
         suppressScrollY: false,
         suppressScrollX: false,
         wheelPropagation: false
@@ -76,12 +81,12 @@ export default {
   computed: {
     placeholder() {
       return this.isSingle
-        ? this.chosenOptions.length && this.chosenOptions[0].label
+        ? this.chosenOptions.length && this.chosenOptions[0]?.label
         : this.chosenOptions.length && `Wybrano: ${this.chosenOptions.length}`
     }
   },
   methods: {
-    openDropdown() {
+    toggleDropdown() {
       this.isDropdownOpened = !this.isDropdownOpened
     },
     chooseOption(option) {
@@ -157,6 +162,10 @@ export default {
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
       border-top: 5px solid #f00;
+
+       &--rotate{
+        transform: rotate(180deg);
+      }
     }
   }
 
