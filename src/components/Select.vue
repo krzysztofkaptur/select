@@ -80,6 +80,10 @@
 				this.isDropdownOpened = !this.isDropdownOpened;
 			},
 			chooseOption(option) {
+				if (this.isSingle) {
+					this.toggleDropdown();
+				}
+
 				this.$emit("select", {
 					mainLabel: this.filter.mainLabel,
 					option,
