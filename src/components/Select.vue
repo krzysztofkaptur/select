@@ -1,5 +1,5 @@
 <template>
-	<div class="multiselect">
+	<div class="multiselect" v-click-outside-close="closeDropdown" :id="`multiselect-${Math.random()}`">
 		<div class="multiselect__placeholder" @click="toggleDropdown">
 			<span class="multiselect__label" :class="[placeholder.length && 'multiselect__label--active']">
 				{{ filter.mainLabel.label }}
@@ -60,6 +60,40 @@
 				default: false,
 			},
 		},
+		directives: {
+			"click-outside-close": {
+				bind: function(el, binding, vNode) {
+					// Provided expression must evaluate to a function.
+					if (typeof binding.value !== "function") {
+						const compName = vNode.context.name;
+						let warn = `[Vue-click-outside-close:] provided expression '${binding.expression}' is not a function, but has to be`;
+						if (compName) {
+							warn += `Found in component '${compName}'`;
+						}
+
+						console.warn(warn);
+					}
+
+					// Define Handler and cache it on the element
+					const bubble = binding.modifiers.bubble;
+					const handler = (e) => {
+						if (bubble || (!el.contains(e.target) && el !== e.target)) {
+							binding.value(e);
+						}
+					};
+					el.__vueClickOutside__ = handler;
+
+					// add Event Listeners
+					document.addEventListener("click", handler);
+				},
+
+				unbind: function(el, binding) {
+					// Remove Event Listeners
+					document.removeEventListener("click", el.__vueClickOutside__);
+					el.__vueClickOutside__ = null;
+				},
+			},
+		},
 		data() {
 			return {
 				isDropdownOpened: false,
@@ -78,6 +112,9 @@
 		methods: {
 			toggleDropdown() {
 				this.isDropdownOpened = !this.isDropdownOpened;
+			},
+			closeDropdown() {
+				this.isDropdownOpened = false;
 			},
 			chooseOption(option) {
 				if (this.isSingle) {
