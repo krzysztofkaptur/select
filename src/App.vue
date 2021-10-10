@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <section class="filters">
-      <div v-for="filter in filters">
+      <div v-for="filter in filters" :key="filter.value">
         <Select
           :filter="filter"
           :chosenOptions="filter.chosenOptions"
